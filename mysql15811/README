@@ -1,0 +1,64 @@
+How to build?
+1. export LIBTOOL=libtool
+2. ../mysql-5.0.45/configure --prefix=${INSTALL} --enable-static --disable-shared --with-debug=yes --with-partition --with-extra-charsets=ujis
+3. make
+//When encountering “LN_S@: no such command” error, change the definition of LN_S to “ln -s” in the related Makefile.
+4. make install
+
+
+How to install and trigger: 
+
+1. cd {INSTALL}
+2. chown -R songlh .
+3. ./bin/mysql_install_db --defaults-file=./my-medium.cnf.sh --user=songlh
+    // necessary change for my-medium.cnf.sh
+    [client]
+    #password    = your_password
+    port   	 = 3306   #choose some other ports
+    socket   	 = /tmp/mysql.sock-songlh
+
+    # Here follows entries for some specific programs
+
+    # The MySQL server
+    [mysqld]
+    port   	 = 3310   #choose some other ports
+    socket   	 = /tmp/mysql.sock-songlh
+
+4. chown -R songlh var
+5. ./libexec/mysqld --defaults-file=./my-medium.cnf.sh &
+6. ./mysql --defaults-file=../my-medium.cnf.sh -u root
+     use test
+     drop table if exists t1;
+     create table t1(c1 char(10)) engine=myisam default charset=latin1;
+     insert into t1 select * from t1;
+     …  //until t1 containing 16384 record
+     quit
+
+7. ./bin/mysqldump --defaults-file=./my-medium.cnf.sh -u root   test t1 > temp.sql
+
+8. 
+Before Patch: 
+Bad Input:
+time ./bin/mysql  --defaults-file=./my-medium.cnf.sh --default-character-set=ujis  -uroot test < temp.sql
+
+real	0m1.487s
+user	0m1.388s
+sys	0m0.000s
+
+
+Good Input:
+time ./bin/mysql  --defaults-file=./my-medium.cnf.sh  -uroot test < temp.sql
+
+real	0m0.093s
+user	0m0.012s
+sys	0m0.000s
+
+
+After Patch:
+time ./bin/mysql  --defaults-file=./my-medium.cnf.sh --default-character-set=ujis  -uroot test < temp.sql
+
+real	0m0.089s
+user	0m0.012s
+sys	0m0.004s
+
+
