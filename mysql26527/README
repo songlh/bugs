@@ -1,0 +1,85 @@
+How to Build? 
+
+1. ../mysql-5.1.14-beta/configure --prefix=${INSTALL} --enable-static --disable-shared --with-debug=yes --with-partition
+
+2. make
+
+3. make install
+
+How to Install?
+
+4. cd ${INSTALL}
+
+5. ./bin/mysql_install_db --defaults-file=./my-medium.cnf.sh --user=songlh
+    //change content of my-medium.sh as follows:
+    # The following options will be passed to all MySQL clients
+    [client]
+    #password    = your_password
+    port   	 = 3306   #choose some other ports
+    socket   	 = /tmp/mysql.sock-songlh
+
+    # Here follows entries for some specific programs
+    # The MySQL server
+    [mysqld]
+    port   	 = 3310   #choose some other ports
+    socket   	 = /tmp/mysql.sock-songlh
+
+6. ./libexec/mysqld --defaults-file=./my-medium.cnf.sh --user=songlh &
+
+7. ./bin/mysql --defaults-file=./my-medium.cnf.sh -u root
+     //mysql command: 
+mysql> use test
+//partitioned table
+mysql> create table t0 (f1 int(10) unsigned NOT NULL DEFAULT '0' , f2 int(10) unsigned DEFAULT NULL , f3 char(33) CHARACTER SET latin1 NOT NULL DEFAULT '', f4 char(15) DEFAULT NULL, f5 datetime NOT NULL DEFAULT '0000-00-00 00:00:00', f6 char(40) CHARACTER SET latin1 DEFAULT NULL, f7 text CHARACTER SET latin1, KEY f1_idx (f1), KEY f5_idx (f5) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 /*!50100 PARTITION BY RANGE (month(f5)) (PARTITION m1 VALUES LESS THAN (2) ENGINE = MyISAM, PARTITION m2 VALUES LESS THAN (3) ENGINE = MyISAM, PARTITION m3 VALUES LESS THAN (4) ENGINE = MyISAM, PARTITION m4 VALUES LESS THAN (5) ENGINE = MyISAM, PARTITION m5 VALUES LESS THAN (6) ENGINE = MyISAM, PARTITION m6 VALUES LESS THAN (7) ENGINE = MyISAM, PARTITION m7 VALUES LESS THAN (8) ENGINE = MyISAM, PARTITION m8 VALUES LESS THAN (9) ENGINE = MyISAM, PARTITION m9 VALUES LESS THAN (10) ENGINE = MyISAM, PARTITION m10 VALUES LESS THAN (11) ENGINE = MyISAM, PARTITION m11 VALUES LESS THAN (12) ENGINE = MyISAM, PARTITION m12 VALUES LESS THAN (13) ENGINE = MyISAM) */
+
+//un-partitioned table
+mysql> create table t1 (f1 int(10) unsigned NOT NULL DEFAULT '0' , f2 int(10) unsigned DEFAULT NULL , f3 char(33) CHARACTER SET latin1 NOT NULL DEFAULT '', f4 char(15) DEFAULT NULL, f5 datetime NOT NULL DEFAULT '0000-00-00 00:00:00', f6 char(40) CHARACTER SET latin1 DEFAULT NULL, f7 text CHARACTER SET latin1, KEY f1_idx (f1), KEY f5_idx (f5) ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+//un-partitioned table
+mysql> create table t0 (f1 int(10) unsigned NOT NULL DEFAULT '0' , f2 int(10) unsigned DEFAULT NULL , f3 char(33) CHARACTER SET latin1 NOT NULL DEFAULT '', f4 char(15) DEFAULT NULL, f5 datetime NOT NULL DEFAULT '0000-00-00 00:00:00', f6 char(40) CHARACTER SET latin1 DEFAULT NULL, f7 text CHARACTER SET latin1, KEY f1_idx (f1), KEY f5_idx (f5) ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+//run delete from t* firstly, otherwise the performance measurement may not be accurate
+//bad input
+mysql> load data infile '/PATH/TO/INPUT/fill.sql' into table t0 fields terminated by ',' lines terminated by '\n';
+Query OK, 1000000 rows affected (15.91 sec)
+Records: 1000000  Deleted: 0  Skipped: 0  Warnings: 0
+
+//good input 
+mysql> load data infile '/PATH/TO/INPUT/fill.sql' into table t1 fields terminated by ',' lines terminated by '\n';
+Query OK, 1000000 rows affected (5.49 sec)
+Records: 1000000  Deleted: 0  Skipped: 0  Warnings: 0
+
+//good input 
+mysql> load data infile '/PATH/TO/INPUT/fill.sql' into table t0 fields terminated by ',' lines terminated by '\n';
+Query OK, 1000000 rows affected (5.49 sec)
+Records: 1000000  Deleted: 0  Skipped: 0  Warnings: 0
+
+
+mysql> delete from t0;
+Query OK, 1000000 rows affected (0.02 sec)
+//bad input
+mysql> insert into t0 select * from t2;
+Query OK, 1000000 rows affected (16.89 sec)
+Records: 1000000  Duplicates: 0  Warnings: 0
+
+mysql> delete from t1;
+Query OK, 1000000 rows affected (0.02 sec)
+
+//good input
+mysql> insert into t1 select * from t2;
+Query OK, 1000000 rows affected (5.12 sec)
+Records: 1000000  Duplicates: 0  Warnings: 0
+
+//insert 1000000 record from command 
+//both good inputs
+time ./bin/mysql --defaults-file=./my-medium.cnf.sh -u root test < ../t1.sql 
+
+real	0m14.813s
+user	0m2.036s
+sys	0m1.008s
+
+time ./bin/mysql --defaults-file=./my-medium.cnf.sh -u root test < ../t0.sql 
+
+real	0m17.596s
+user	0m1.916s
+sys	0m1.052s
