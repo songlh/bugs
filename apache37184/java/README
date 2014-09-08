@@ -1,0 +1,17 @@
+How to install?
+
+1. export PATH=/where/is/the/code
+2. cd $PATH
+3. cd apache-ant-1.6.5
+4. build.sh
+5. cp ../ant-contrib.jar  ./dist/lib
+6. cd $PATH/input
+7. ../dist/bin/ant
+
+Before Patch:
+[stopwatch] [timer0: 0.496 sec]
+[stopwatch] [timer1: 2.028 sec]
+
+After Patch:
+[stopwatch] [timer0: 0.507 sec]
+[stopwatch] [timer1: 0.181 sec]
