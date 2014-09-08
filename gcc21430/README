@@ -1,0 +1,29 @@
+How to install this bug?
+
+1. export ROOT=/where/is/source/code
+
+2. cd ${ROOT}
+
+3. cd gcc-4.1.0
+
+4. mkdir build
+
+5. cd build
+
+6. ../configure --without-headers --with-newlib --disable-bootstrap --disable-shared --disable-threads --disable-multilib --enable-languages=c --disable-libmudflap --disable-libssp --disable-libquadmath --disable-libgomp --disable-libatomic --disable-libgcc
+
+7. make -j 8
+
+8. cd ${ROOT}
+
+How to trigger this bug?
+
+time ./gcc-4.1.0/build/gcc/cc1 -quiet -w -O1 ./inputs/0.c 
+
+real	0m3.423s
+user	0m3.404s
+sys	0m0.016s
+
+
+After patching, the execution time will be around 0.7s. 
+ 
