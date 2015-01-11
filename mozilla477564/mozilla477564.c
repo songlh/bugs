@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#define RUNNUM 100
 
 char ConstantLocalName[] = "tr";
 char ConstantName[] = "tr";
@@ -103,7 +104,7 @@ void sss_collectFormDataForFrame(Node * node)
   {
     int id = node->id != -1 ? node->id : sss_xph_generate(node);
     data[id] = node->type == checkbox ? node->Checked : 0;
-  }while( node = node->nextSibling );
+  }while( (node = node->nextSibling) );
 
 }
 
@@ -116,7 +117,13 @@ int main(int argc, char ** argv )
   }
 
   Node * header = createList(atoi(argv[1]));
-  sss_collectFormDataForFrame(header);
-  DumpList(header, atoi(argv[1]));
+  int iNum = 0;
+  for(; iNum < RUNNUM; iNum ++)
+  {
+    sss_collectFormDataForFrame(header);
+  }
+
+  
+  //DumpList(header, atoi(argv[1]));
 
 }
