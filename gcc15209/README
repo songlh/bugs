@@ -43,5 +43,32 @@ after patch:
 ./input/bad.ii:41: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash PACKET_HEADER::setid'
 ./input/bad.ii:52: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash MAINPACKET::fileid[0u]'
 
- 
+
+
+patch:
+
+--- gcc/gcc/cp/tree.c	2004/03/19 07:13:37	1.360.4.5
++++ gcc/gcc/cp/tree.c	2004/05/31 21:04:12	1.360.4.6
+@@ -90,6 +90,10 @@
+    case COMPONENT_REF:
+      op1_lvalue_kind = lvalue_p_1 (TREE_OPERAND (ref, 0),
+				    treat_class_rvalues_as_lvalues);
++      /* In an expression of the form "X.Y", the packed-ness of the
++	 expression does not depend on "X".  */
++      op1_lvalue_kind &= ~clk_packed;
++      /* Look at the member designator.  */
+      if (!op1_lvalue_kind
+	  /* The "field" can be a FUNCTION_DECL or an OVERLOAD in some	
+  	     situations.  */
+          || TREE_CODE (TREE_OPERAND (ref, 1)) != FIELD_DECL)
+ 	;
+     else if (DECL_C_BIT_FIELD (TREE_OPERAND (ref, 1)))
+	{
+	  /* Clear the ordinary bit.  If this object was a class
+	     rvalue we want to preserve that information.  */
+	  op1_lvalue_kind &= ~clk_ordinary;
+	  /* The lvalue is for a bitfield.  */
+	  op1_lvalue_kind |= clk_bitfield;
+	}
+
  
