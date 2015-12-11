@@ -1,0 +1,47 @@
+How to install this bug?
+
+1. export ROOT=/where/is/source/code
+
+2. cd ${ROOT}
+
+3. cd gcc-3.4.0
+
+4. mkdir build
+
+5. cd build
+
+6. ../configure --disable-multilib  --enable-languages=c,c++ --enable-shared
+
+7. make
+
+8. cd ${ROOT}
+
+How to trigger this bug?
+
+./gcc-3.4.0/build/gcc/cc1plus -quiet ./input/bad.ii 
+
+./input/bad.ii:40: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash PACKET_HEADER::hash'
+./input/bad.ii:41: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash PACKET_HEADER::setid'
+./input/bad.ii:52: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash MAINPACKET::fileid[0u]'
+Segmentation fault (core dumped)
+
+./gcc-3.4.0/build/gcc/cc1plus -quiet ./input/good.ii
+./input/good.ii:48: warning: ignoring packed attribute on unpacked non-POD field `PACKET_HEADER MAINPACKET::header'
+./input/good.ii:52: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash MAINPACKET::fileid[0u]
+
+diff ./input/bad.ii ./input/good.ii 
+43c43
+< } __attribute__ ((packed));
+---
+> } ;
+
+
+after patch:
+
+./gcc-3.4.0/build/gcc/cc1plus -quiet ./input/bad.ii
+./input/bad.ii:40: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash PACKET_HEADER::hash'
+./input/bad.ii:41: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash PACKET_HEADER::setid'
+./input/bad.ii:52: warning: ignoring packed attribute on unpacked non-POD field `MD5Hash MAINPACKET::fileid[0u]'
+
+ 
+ 
