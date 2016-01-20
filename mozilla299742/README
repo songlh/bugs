@@ -1,0 +1,30 @@
+How to build?
+make -f client.mk build
+
+
+Possible problems during building:
+1. ../coreconf/config.mk:71: ../coreconf/Linux3.5.mk: No such file or directory
+cp security/coreconf/Linux2.6.mk security/coreconf/Linux3.5.mk
+
+2. nsCanvasRenderingContext2D.cpp:769: error: undefined reference to 'XRenderFindStandardFormat'
+cd browser/app/
+c++ -o firefox-bin  -fno-rtti -fno-exceptions -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -Wno-long-long -pedantic -fshort-wchar -pthread -pipe  -DDEBUG -D_DEBUG -DDEBUG_songlh -DTRACING -g -fno-inline  nsBrowserApp.o nsStaticComponents.o            -L../../dist/bin -L../../dist/lib -L../../dist/lib/components  ../../dist/lib/libxulapp_s.a -L../../dist/bin -lmozjs -L../../dist/bin -lxpcom -lxpcom_core  -L../../dist/lib -lplds4 -lplc4 -lnspr4 -lpthread -ldl -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lglib-2.0     -lX11  -ldl -lm  ../../dist/lib/components/libxpcom_compat_c.a ../../dist/lib/components/libxpconnect.a ../../dist/lib/components/libuconv.a ../../dist/lib/components/libi18n.a ../../dist/lib/components/libmork.a ../../dist/lib/components/libstoragecomps.a ../../dist/lib/components/libnecko.a ../../dist/lib/components/libnecko2.a ../../dist/lib/components/libpref.a ../../dist/lib/components/libcaps.a ../../dist/lib/components/librdf.a ../../dist/lib/components/libhtmlpars.a ../../dist/lib/components/libgfxps.a ../../dist/lib/components/libgfx_gtk.a ../../dist/lib/components/libimglib2.a ../../dist/lib/components/libgkplugin.a ../../dist/lib/components/libwidget_gtk2.a ../../dist/lib/components/libgklayout.a ../../dist/lib/components/libdocshell.a ../../dist/lib/components/libembedcomponents.a ../../dist/lib/components/libwebbrwsr.a ../../dist/lib/components/libeditor.a ../../dist/lib/components/libtxmgr.a ../../dist/lib/components/libcomposer.a ../../dist/lib/components/libnsappshell.a ../../dist/lib/components/liboji.a ../../dist/lib/components/libaccessibility.a ../../dist/lib/components/libchrome.a ../../dist/lib/components/libmozfind.a ../../dist/lib/components/libappcomps.a ../../dist/lib/components/libfileview.a ../../dist/lib/components/libremoteservice.a ../../dist/lib/components/libcommandlines.a ../../dist/lib/components/libtoolkitcomps.a ../../dist/lib/components/libpipboot.a ../../dist/lib/components/libpipnss.a ../../dist/lib/components/libpippki.a ../../dist/lib/components/libcookie.a ../../dist/lib/components/libxmlextras.a ../../dist/lib/components/libautoconfig.a ../../dist/lib/components/libsystem-pref.a ../../dist/lib/components/libtransformiix.a ../../dist/lib/components/libuniversalchardet.a ../../dist/lib/components/libwebsrvcs.a ../../dist/lib/components/libauth.a ../../dist/lib/components/libpermissions.a ../../dist/lib/components/libsearchservice.a ../../dist/lib/components/libbrowserdirprovider.a ../../dist/lib/components/libbrowsercomps.a ../../dist/lib/libunicharutil_s.a ../../dist/lib/libucvutil_s.a ../../dist/lib/libgtkxtbin.a ../../dist/lib/libgfxshared_s.a ../../dist/lib/libgfxpsshar.a ../../dist/lib/libgkgfx.a ../../dist/lib/libjsj.a ../../dist/lib/libxulapp_s.a  -L../../dist/lib -lmozpng -L../../dist/lib -lmozjpeg -L../../dist/lib -lmozz  -L-L../../dist/bin -L../../dist/lib -lcrmf -lsmime3 -lssl3 -lnss3 -lsoftokn3  -lcairo    -lXt -lXft   -L../../dist/lib -lxpcom_compat -lXrender -lX11
+// -lXrender -lX11 are added
+make
+
+How to run?
+cd dist/bin/
+export LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH}
+./firefox-bin
+
+Bad Input:
+CPU usage is around 40%
+
+Good Input:
+CPU usage is around 12%
+
+diff good.html bad.html 
+80c80
+< div.clearer {background-color: #EEDDDD;}
+---
+> div.clearer {clear: both; background-color: #EEDDDD;}
