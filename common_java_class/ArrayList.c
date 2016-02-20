@@ -105,6 +105,36 @@ bool ArrayList_add(ArrayList * pArray, int e)
 	return true;
 }
 
+void ArrayList_fastRemove(ArrayList * pArray, int index)
+{
+	int numMoved = pArray->size - index - 1;
+	if(numMoved)
+	{
+		while(index < pArray->size - 1)
+		{
+			pArray->data[index] = pArray->data[index+1];
+			index ++;
+		}
+	}
+
+	pArray->size --;
+}
+
+bool ArrayList_remove(ArrayList * pArray, int o)
+{
+	int index = 0;
+	for(index = 0; index < pArray->size; index ++ )
+	{
+		if(pArray->data[index] == o)
+		{
+			ArrayList_fastRemove(pArray, index);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void ArrayList_print(ArrayList * pArray)
 {
 	printf("size: %d\n", pArray->size);
