@@ -5,10 +5,7 @@
 #include <string.h>
 #include <limits.h>
 
-
-#define DEFAULT_INITIAL_CAPACITY 16
-#define MAXIMUM_CAPACITY 1 << 30
-#define DEFAULT_LOAD_FACTOR 0.75
+#include "ArrayList.h"
 
 typedef struct stMapEntry 
 {
@@ -254,6 +251,11 @@ MapEntry * HashMap_removeEntryForKey(HashMap * pHash, int key)
 		e = next;
 	}
 
+	if(e != NULL)
+	{
+		free(e);
+	}
+
 	return e;
 }
 
@@ -271,10 +273,18 @@ void HashMap_print(HashMap * pHash)
 
 	for(i=0; i < pHash->capacity; i ++)
 	{
-		if(pHash->table[i] != NULL)
+		//if(pHash->table[i] != NULL)
+		//{
+		//	printf("%d %d %d\n", i, pHash->table[i]->key, pHash->table[i]->value);
+		//}
+
+		MapEntry * e = pHash->table[i];
+
+		for(; e != NULL; e = e->next)
 		{
-			printf("%d %d %d\n", i, pHash->table[i]->key, pHash->table[i]->value);
+			printf("%d %d %d\n", i, e->key, e->value);
 		}
+
 	}
 }
 
@@ -284,9 +294,14 @@ void HashMap_destroy(HashMap * pHash)
 
 	for(i = 0; i < pHash->capacity; i ++ )
 	{
-		if(pHash->table[i] != NULL )
+		MapEntry * c = pHash->table[i];
+		MapEntry * n = c;
+
+		while(c != NULL)
 		{
-			free(pHash->table[i]);
+			n = c->next;
+			free(c);
+			c = n;
 		}
 	}
 
@@ -326,8 +341,58 @@ bool HashSet_remove(HashSet * pSet, int o)
 	return HashMap_remove(pSet->map, o);
 }
 
+bool HashSet_removeAll(HashSet * pSet, ArrayList * c)
+{
+	bool modified = false;
+	int i;
+
+	if(pSet->map->size > c->size)
+	{
+		for(i = 0; i < c->size; i ++)
+		{
+			modified |= HashSet_remove(pSet, c->data[i]);
+		}
+	}
+	else
+	{
+		for(i = 0; i < pSet->map->capacity; i ++ )
+		{
+			MapEntry * current = pSet->map->table[i];
+			MapEntry * prev = current;
+			MapEntry * n = current;
+
+			while(current != NULL)
+			{
+				n = current->next;
+
+				if(ArrayList_contains(c, current->key))
+				{
+					if(prev == current)
+					{
+						pSet->map->table[i] = n;
+					}
+					else
+					{
+						prev->next = n;
+					}
+
+					free(current);
+
+					modified = true;
+				}
+
+				prev = current;
+				current = n;
+			}
+		}
+	}
+
+	return modified;
+}
+
 int main(int argc, char ** argv)
 {
+	/*
 	int i;
 	HashMap * pHash = (HashMap *)malloc(sizeof(HashMap));
 	HashMap_HashMap2(pHash, 10, 0.1);
@@ -335,10 +400,37 @@ int main(int argc, char ** argv)
 	for(i = 0; i < 30; i ++ )
 	{
 		HashMap_put(pHash, i, i);
-		//printf("%d %d\n", i, HashMap_hash(i));
 	}
 
 	HashMap_print(pHash);
 	HashMap_destroy(pHash);
 	free(pHash);
+	*/
+
+	int i;
+	HashSet * pSet = (HashSet *)malloc(sizeof(HashSet));
+	HashSet_HashSet(pSet);
+
+	for(i = 0; i < 40; i ++)
+	{
+		HashSet_add(pSet, i);
+	}
+
+	ArrayList * pArray = (ArrayList *)malloc(sizeof(ArrayList));
+	ArrayList_ArrayList0(pArray);
+
+	for(i = 0; i < 20; i ++)
+	{
+		ArrayList_add1(pArray, i);
+	}
+
+	HashSet_removeAll(pSet, pArray);
+
+	HashMap_print(pSet->map);
+
+	ArrayList_destroy(pArray);
+	free(pArray);
+
+	HashSet_destroy(pSet);
+	free(pSet);
 }

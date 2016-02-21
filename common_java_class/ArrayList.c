@@ -3,15 +3,11 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <limits.h>
 
-#define DEFAULT_CAPACITY 10
+#include "ArrayList.h"
 
-typedef struct stArrayList
-{
-	int size;
-	int capacity;
-	int * data;
-} ArrayList;
+
 
 int max(int a, int b)
 {
@@ -94,7 +90,7 @@ bool ArrayList_contains(ArrayList * pArray, int o)
 	return ArrayList_indexOf(pArray, o) >= 0;
 }
 
-bool ArrayList_add(ArrayList * pArray, int e)
+bool ArrayList_add1(ArrayList * pArray, int e)
 {
 	if(pArray->size == pArray->capacity )
 	{	
@@ -103,6 +99,33 @@ bool ArrayList_add(ArrayList * pArray, int e)
 
 	pArray->data[pArray->size++] = e;
 	return true;
+}
+
+bool ArrayList_rangeCheckForAdd(ArrayList * pArray, int index)
+{
+	if(index > pArray->size || index < 0)
+	{
+		printf("IndexOutOfBoundsException %d\n", index);
+		exit(-1);
+	}
+}
+
+bool ArrayList_add2(ArrayList * pArray, int index, int element )
+{
+	ArrayList_rangeCheckForAdd(pArray, index);
+	ArrayList_ensureCapacity(pArray, pArray->size + 1);
+
+	int size = pArray->size;
+
+	while(size > index)
+	{
+		pArray->data[size] = pArray->data[size-1];
+		size --;
+	}
+
+	pArray->data[index] = element;
+	pArray->size++;
+
 }
 
 void ArrayList_fastRemove(ArrayList * pArray, int index)
@@ -135,6 +158,34 @@ bool ArrayList_remove(ArrayList * pArray, int o)
 	return false;
 }
 
+bool ArrayList_batchRemove(ArrayList * pArray, ArrayList * c, bool complement)
+{
+	int * elementData = pArray->data;
+	int r = 0, w = 0;
+	bool modified = false;
+
+	for(; r < pArray->size; r ++ )
+	{
+		if(ArrayList_contains(c, elementData[r]) == complement)
+		{
+			elementData[w++] = elementData[r];
+		}
+	}
+
+	if(w != pArray->size)
+	{
+		pArray->size = w;
+		modified = true;
+	}
+
+	return modified;
+}
+
+bool ArrayList_removeAll(ArrayList * pArray, ArrayList * c)
+{
+	return ArrayList_batchRemove(pArray, c, false);
+}
+
 void ArrayList_print(ArrayList * pArray)
 {
 	printf("size: %d\n", pArray->size);
@@ -152,22 +203,4 @@ void ArrayList_print(ArrayList * pArray)
 void ArrayList_destroy(ArrayList * pArray)
 {
 	free(pArray->data);
-}
-
-int main(int argc, char ** argv)
-{
-	ArrayList * list = (ArrayList *)malloc(sizeof(ArrayList));
-	ArrayList_ArrayList0(list);
-
-	int size = 500;
-	int i;
-
-	for (i = size-4; i < 2*size; i++)
-	{
-		ArrayList_add(list, i);
-	}
-
-	ArrayList_print(list);
-	ArrayList_destroy(list);
-	free(list);
 }

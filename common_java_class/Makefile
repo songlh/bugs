@@ -9,10 +9,10 @@ linkedlist: LinkedList.c
 	${CC} ${CFLAGS} LinkedList.c -o test_LinkedList
 
 arraylist: ArrayList.c
-	${CC} ${CFLAGS} ArrayList.c -o test_ArrayList
+	${CC} ${CFLAGS} ArrayList.c test_ArrayList.c -o test_ArrayList
 
 hashmap: HashMap.c
-	${CC} ${CFLAGS} HashMap.c -o test_HashMap
+	${CC} ${CFLAGS} HashMap.c ArrayList.c -o test_HashMap
 
 clean:
 	rm -rf test_ArrayList test_HashMap test_LinkedList
