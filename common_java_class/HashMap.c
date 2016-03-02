@@ -92,7 +92,7 @@ void HashMap_HashMap2( HashMap * pHash, int initialCapacity, float loadFactor)
 	pHash->size = 0;	
 }
 
-int HashMap_HashMap1(HashMap * pHash, int initialCapacity)
+void HashMap_HashMap1(HashMap * pHash, int initialCapacity)
 {
 	HashMap_HashMap2(pHash, initialCapacity,  DEFAULT_LOAD_FACTOR);
 }
@@ -138,6 +138,22 @@ MapEntry * HashMap_getEntry(HashMap * pHash, int key)
 	}
 
 	return NULL;
+}
+
+int HashMap_get(HashMap * pHash, int key)
+{
+	int hash = HashMap_hash(key);
+	MapEntry * e = pHash->table[HashMap_indexFor(hash, pHash->capacity)];
+
+	for(; e != NULL; e = e->next)
+	{	
+		if(e->hash == hash && e->key == key)
+		{
+			return e->value;
+		}
+	}
+
+	return INT_MIN;
 }
 
 bool HashMap_containsKey(HashMap * pHash, int key)
@@ -232,9 +248,11 @@ MapEntry * HashMap_removeEntryForKey(HashMap * pHash, int key)
 	while(e != NULL)
 	{
 		MapEntry * next = e->next;
+
 		if(e->hash == hash && e->key == key)
 		{
 			pHash->size--;
+
 			if(prev == e)
 			{
 				pHash->table[i] = next;
@@ -244,7 +262,7 @@ MapEntry * HashMap_removeEntryForKey(HashMap * pHash, int key)
 				prev->next = next;
 			}
 
-			return e;
+			break;
 		}
 
 		prev = e;
@@ -273,10 +291,6 @@ void HashMap_print(HashMap * pHash)
 
 	for(i=0; i < pHash->capacity; i ++)
 	{
-		//if(pHash->table[i] != NULL)
-		//{
-		//	printf("%d %d %d\n", i, pHash->table[i]->key, pHash->table[i]->value);
-		//}
 
 		MapEntry * e = pHash->table[i];
 
@@ -316,7 +330,7 @@ typedef struct stHashSet
 void HashSet_HashSet(HashSet * pSet)
 {
 	pSet->map = (HashMap *)malloc(sizeof(HashMap));
-	HashMap_HashMap2(pSet->map, 10, 0.1);
+	HashMap_HashMap0(pSet->map);
 }
 
 void HashSet_destroy(HashSet * pSet)
@@ -330,6 +344,27 @@ bool HashSet_add(HashSet * pSet, int e)
 	return HashMap_put(pSet->map, e, e);
 }
 
+bool HashSet_addAll(HashSet * pSet, ArrayList * c)
+{
+	bool modified = false;
+	int i = 0;
+	for(i=0; i < c->size; i ++)
+	{
+		if(HashSet_add(pSet, c->data[i]))
+		{
+			modified = true;
+		}
+	}
+
+	return modified;
+}
+
+void HashSet_HashSet1(HashSet * pSet, ArrayList * c)
+{
+	pSet->map = (HashMap *)malloc(sizeof(HashMap));
+	HashMap_HashMap1(pSet->map, max((int)(c->size / DEFAULT_LOAD_FACTOR) + 1, DEFAULT_INITIAL_CAPACITY));
+	HashSet_addAll(pSet, c);
+}
 
 bool HashSet_contains(HashSet * pSet, int o)
 {
@@ -377,10 +412,54 @@ bool HashSet_removeAll(HashSet * pSet, ArrayList * c)
 					}
 
 					free(current);
-
 					modified = true;
+					current = n;
+					//prev = n;
+				}
+				else
+				{
+					prev = current;
+					current = n;
+				}
+			}
+		}
+	}
+
+	return modified;
+}
+
+bool HashSet_retainAll(HashSet * pSet, ArrayList * c)
+{
+	bool modified = false;
+	int i;
+	for(i = 0; i < pSet->map->capacity; i ++ )
+	{
+		MapEntry * current = pSet->map->table[i];
+		MapEntry * prev = current;
+		MapEntry * n = current;
+
+		while(current != NULL)
+		{
+			n = current->next;
+
+			if(!ArrayList_contains(c, current->key))
+			{
+				if(prev == current)
+				{
+					pSet->map->table[i] = n;
+				}
+				else
+				{
+					prev->next = n;
 				}
 
+				free(current);
+				modified = true;
+				current = n;
+				//prev = n;
+			}
+			else
+			{
 				prev = current;
 				current = n;
 			}
