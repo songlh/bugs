@@ -1,0 +1,32 @@
+How to install this bug?
+
+1. export ROOT=/where/is/buggy/code
+
+2. cd ${ROOT}
+
+3. cd buggy/src/
+
+4. make -f Makefile.ref
+
+How to trigger this bug?
+
+cd ${ROOT}
+
+time ./buggy/src/Linux_All_DBG.OBJ/js foo.js 
+
+
+
+real	0m0.336s
+user	0m0.332s
+sys	0m0.004s
+
+time ./patched/src/Linux_All_DBG.OBJ/js foo.js 
+
+
+
+real	0m0.073s
+user	0m0.064s
+sys	0m0.012s
+
+
+  
