@@ -1,0 +1,45 @@
+How to build?
+0. cd {PATH_TO_bugs}/mysql27287
+1. cd buggy
+2. mkdir build
+3. cd build
+4. ../configure --prefix=${INSTALL} --enable-static --disable-shared --with-debug=yes --with-partition
+5. make
+6. make install
+
+How to install and trigger: 
+
+0. cd {PATH_TO_bugs}/mysql27287
+1. cp my-medium.cnf.sh ${INSTALL}
+2. cd ${INSTALL}
+3. chown -R songlh .
+4. ./bin/mysql_install_db --defaults-file=./my-medium.cnf.sh --user=songlh
+5. chown -R songlh var
+6. ./libexec/mysqld --defaults-file=./my-medium.cnf.sh &
+7. ./bin/mysql --defaults-file=./my-medium.cnf.sh -u root test < ../prepare_data.sql 
+8. time ./bin/mysql --defaults-file=./my-medium.cnf.sh -u root test < ../0.sql
+extractvalue(xv, '/a/list/b2')
+2
+
+real	0m2.790s
+user	0m0.004s
+sys	0m0.000s
+
+After Patch:
+time ./bin/mysql --defaults-file=./my-medium.cnf.sh -u root test < ../0.sql
+extractvalue(xv, '/a/list/b2')
+2
+
+real	0m0.017s
+user	0m0.004s
+sys	0m0.000s
+
+
+
+
+
+
+
+How to shut down?
+
+bin/mysqladmin --defaults-file=my-medium.cnf.sh shutdown -u root test
